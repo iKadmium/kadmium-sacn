@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <RootNamespace>Kadmium_sACN</RootNamespace>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <Title>Kadmium sACN</Title>
+    <Description>A fairly lightweight sACN package for .Net Standard</Description>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <Version>0.1.3</Version>
+    <Authors>Jesse Higginson</Authors>
+    <PackageProjectUrl>https://github.com/iKadmium/kadmium-osc</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/iKadmium/kadmium-osc.git</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+  </PropertyGroup>
+	
+  <ItemGroup>
+    <PackageReference Include="System.Memory" Version="4.5.4" />
+  </ItemGroup>
+
+</Project>
