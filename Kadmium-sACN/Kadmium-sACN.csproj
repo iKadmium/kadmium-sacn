@@ -11,8 +11,8 @@
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <Version>0.1.3</Version>
     <Authors>Jesse Higginson</Authors>
-    <PackageProjectUrl>https://github.com/iKadmium/kadmium-osc</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/iKadmium/kadmium-osc.git</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/iKadmium/kadmium-sacn</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/iKadmium/kadmium-sacn.git</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
   </PropertyGroup>
 	
