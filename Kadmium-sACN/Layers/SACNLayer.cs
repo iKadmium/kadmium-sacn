@@ -21,7 +21,7 @@ namespace Kadmium_sACN.Layers
 			}
 		}
 
-		public byte Flags { get; } = 0x7;
+		public byte Flags => 0x7;
 		public UInt16 PDULength { get; set; }
 		public abstract int Length { get; }
 	}
