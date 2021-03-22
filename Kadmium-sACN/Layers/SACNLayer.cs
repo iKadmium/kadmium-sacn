@@ -18,10 +18,11 @@ namespace Kadmium_sACN.Layers
 			set
 			{
 				PDULength = (UInt16)(value & LowTwelveBits);
+				Flags = (byte)((value & HighFourBits) >> 12);
 			}
 		}
 
-		public byte Flags => 0x7;
+		public byte Flags { get; set; }
 		public UInt16 PDULength { get; set; }
 		public abstract int Length { get; }
 	}

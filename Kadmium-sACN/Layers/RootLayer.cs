@@ -51,6 +51,10 @@ namespace Kadmium_sACN.Layers
 
 			rootLayer.FlagsAndLength = BinaryPrimitives.ReadUInt16BigEndian(bytes);
 			bytes = bytes.Slice(sizeof(UInt16));
+			if(rootLayer.Flags != FLAGS)
+			{
+				throw new ArgumentException($"The flags were not correct. Expected {FLAGS}, received {rootLayer.Flags}");
+			}
 
 			rootLayer.Vector = BinaryPrimitives.ReadUInt32BigEndian(bytes);
 			bytes = bytes.Slice(sizeof(UInt32));
