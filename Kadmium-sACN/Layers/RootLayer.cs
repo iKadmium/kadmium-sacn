@@ -1,15 +1,18 @@
 ﻿using System;
 using System.Buffers.Binary;
 using System.Collections;
+using System.Collections.Specialized;
 
 namespace Kadmium_sACN.Layers
 {
+	public enum RootLayerVector
+	{
+		VECTOR_ROOT_E131_DATA = 0x00000004,
+		VECTOR_ROOT_E131_EXTENDED = 0x00000008
+	}
+
 	public class RootLayer : SACNLayer
 	{
-		public const UInt32 VECTOR_ROOT_E131_DATA =		0x00000004;
-		public const UInt32 VECTOR_ROOT_E131_EXTENDED =	0x00000008;
-
-		public const UInt16 FLAGS =						0x7;
 		public const UInt16 PREAMBLE_SIZE =				0x0010;
 		public const UInt16 POSTAMBLE_SIZE =			0;
 		public const int LENGTH =						38;
@@ -19,9 +22,26 @@ namespace Kadmium_sACN.Layers
 			0x41, 0x53, 0x43, 0x2d, 0x45, 0x31, 0x2e, 0x31, 0x37, 0x00, 0x00, 0x00
 		};
 
-		public UInt32 Vector { get; set; }
+		public RootLayerVector Vector { get; set; }
 		public byte[] CID { get; set; } = new byte[16];
 		public override int Length => LENGTH;
+		
+		public void Write(Span<byte> bytes, UInt16 remainingLength)
+		{
+			bytes = bytes.Slice(0, Length);
+			BinaryPrimitives.WriteUInt16BigEndian(bytes, PREAMBLE_SIZE);
+			bytes = bytes.Slice(sizeof(UInt16));
+			BinaryPrimitives.WriteUInt16BigEndian(bytes, POSTAMBLE_SIZE);
+			bytes = bytes.Slice(sizeof(UInt16));
+			ACNIdentifier.CopyTo(bytes);
+			bytes = bytes.Slice(ACNIdentifier.Length);
+			UInt16 pduLength = (UInt16)(remainingLength + Length - 16);
+			BinaryPrimitives.WriteUInt16BigEndian(bytes, GetFlagsAndLength(pduLength));
+			bytes = bytes.Slice(sizeof(UInt16));
+			BinaryPrimitives.WriteUInt32BigEndian(bytes, (UInt32)Vector);
+			bytes = bytes.Slice(sizeof(UInt32));
+			CID.CopyTo(bytes);
+		}
 
 		public static RootLayer Parse(ReadOnlySpan<byte> bytes)
 		{
@@ -32,31 +52,27 @@ namespace Kadmium_sACN.Layers
 			bytes = bytes.Slice(sizeof(UInt16));
 			if (preambleSize != PREAMBLE_SIZE)
 			{
-				throw new ArgumentException($"The preamble size was not correct. Expected {PREAMBLE_SIZE}, received {preambleSize}");
+				return null;
 			}
 
 			var postambleSize = BinaryPrimitives.ReadUInt16BigEndian(bytes);
 			bytes = bytes.Slice(sizeof(UInt16));
 			if (postambleSize != POSTAMBLE_SIZE)
 			{
-				throw new ArgumentException($"The postamble size was not correct. Expected {POSTAMBLE_SIZE}, received {postambleSize}");
+				return null;
 			}
 
 			var acnIdentifier = bytes.Slice(0, ACNIdentifier.Length);
 			bytes = bytes.Slice(ACNIdentifier.Length);
 			if (!acnIdentifier.SequenceEqual(ACNIdentifier))
 			{
-				throw new ArgumentException($"The sequence identifier was not correct");
+				return null;
 			}
 
-			rootLayer.FlagsAndLength = BinaryPrimitives.ReadUInt16BigEndian(bytes);
+			var flagsAndLength = BinaryPrimitives.ReadUInt16BigEndian(bytes);
 			bytes = bytes.Slice(sizeof(UInt16));
-			if(rootLayer.Flags != FLAGS)
-			{
-				throw new ArgumentException($"The flags were not correct. Expected {FLAGS}, received {rootLayer.Flags}");
-			}
-
-			rootLayer.Vector = BinaryPrimitives.ReadUInt32BigEndian(bytes);
+			
+			rootLayer.Vector = (RootLayerVector)BinaryPrimitives.ReadUInt32BigEndian(bytes);
 			bytes = bytes.Slice(sizeof(UInt32));
 
 			var cid = bytes.Slice(0, 16);

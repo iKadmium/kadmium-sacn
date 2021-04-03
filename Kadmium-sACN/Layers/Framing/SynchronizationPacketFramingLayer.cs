@@ -3,23 +3,23 @@ using System.Buffers.Binary;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Kadmium_sACN.Layers
+namespace Kadmium_sACN.Layers.Framing
 {
 	public class SynchronizationPacketFramingLayer : FramingLayer
 	{
+		public const int LENGTH = 11;
 		public byte SequenceNumber { get; set; }
 		public UInt16 SynchronizationAddress { get; set; }
-		public override int Length => 11;
+		public override int Length => LENGTH;
 
 		public static SynchronizationPacketFramingLayer Parse(ReadOnlySpan<byte> bytes)
 		{
 			SynchronizationPacketFramingLayer framingLayer = new SynchronizationPacketFramingLayer();
 
-			framingLayer.FlagsAndLength = BinaryPrimitives.ReadUInt16BigEndian(bytes);
-			bytes = bytes.Slice(0, framingLayer.FlagsAndLength);
+			var flagsAndLength = BinaryPrimitives.ReadUInt16BigEndian(bytes);
 			bytes = bytes.Slice(sizeof(UInt16));
 
-			framingLayer.Vector = BinaryPrimitives.ReadUInt32BigEndian(bytes);
+			framingLayer.Vector = (FramingLayerVector)BinaryPrimitives.ReadUInt32BigEndian(bytes);
 			bytes = bytes.Slice(sizeof(UInt32));
 
 			framingLayer.SequenceNumber = bytes[0];

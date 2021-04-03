@@ -1,29 +1,21 @@
 ﻿using System;
+using System.Buffers.Binary;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Text;
 
 namespace Kadmium_sACN.Layers
 {
 	public abstract class SACNLayer
 	{
-		public static UInt16 LowTwelveBits = 0b0000_1111_1111_1111;
-		public static UInt16 HighFourBits = 0b1111_0000_0000_0000;
-		
-		public UInt16 FlagsAndLength
-		{
-			get
-			{
-				return (UInt16)((UInt16)(PDULength & LowTwelveBits) | (UInt16)((Flags << 12) & HighFourBits));
-			}
-			set
-			{
-				PDULength = (UInt16)(value & LowTwelveBits);
-				Flags = (byte)((value & HighFourBits) >> 12);
-			}
-		}
+		public const byte FLAGS = 0x7;
+		public const UInt16 LengthMask = 0x0FFF;
 
-		public byte Flags { get; set; }
-		public UInt16 PDULength { get; set; }
 		public abstract int Length { get; }
+
+		protected UInt16 GetFlagsAndLength(UInt16 Length)
+		{
+			return (UInt16)((FLAGS << 12) | Length);
+		}
 	}
 }

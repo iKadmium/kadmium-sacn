@@ -3,10 +3,16 @@ using System.Buffers.Binary;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Kadmium_sACN.Layers
+namespace Kadmium_sACN.Layers.Framing
 {
 	public class DataPacketFramingLayer : FramingLayer
 	{
+		public const byte PreviewDataMask = 0b00000010;
+		public const byte StreamTerminatedMask = 0b00000100;
+		public const byte ForceSynchronizationMask = 0b00001000;
+
+		public const int LENGTH = 77;
+
 		public string SourceName { get; set; }
 		public byte Priority { get; set; }
 		public UInt16 SynchronizationAddress { get; set; }
@@ -15,7 +21,7 @@ namespace Kadmium_sACN.Layers
 		public bool StreamTerminated { get; set; }
 		public bool ForceSynchronization { get; set; }
 		public UInt16 Universe { get; set; }
-		public override int Length => 77;
+		public override int Length => LENGTH;
 
 		public byte Options
 		{
@@ -48,11 +54,10 @@ namespace Kadmium_sACN.Layers
 		{
 			DataPacketFramingLayer framingLayer = new DataPacketFramingLayer();
 
-			framingLayer.FlagsAndLength = BinaryPrimitives.ReadUInt16BigEndian(bytes);
-			bytes = bytes.Slice(0, framingLayer.FlagsAndLength);
+			var flagsAndLength = BinaryPrimitives.ReadUInt16BigEndian(bytes);
 			bytes = bytes.Slice(sizeof(UInt16));
 
-			framingLayer.Vector = BinaryPrimitives.ReadUInt32BigEndian(bytes);
+			framingLayer.Vector = (FramingLayerVector)BinaryPrimitives.ReadUInt32BigEndian(bytes);
 			bytes = bytes.Slice(sizeof(UInt32));
 
 			var sourceNameBytes = bytes.Slice(0, 64);

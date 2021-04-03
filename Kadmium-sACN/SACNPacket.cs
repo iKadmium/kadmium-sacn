@@ -1,4 +1,5 @@
 ﻿using Kadmium_sACN.Layers;
+using Kadmium_sACN.Layers.Framing;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -26,7 +27,7 @@ namespace Kadmium_sACN
 				case UniverseDiscoveryPacketFramingLayer discoveryLayer:
 					return UniverseDiscoveryPacket.Parse(bytes, rootLayer, discoveryLayer);
 				default:
-					throw new ArgumentException("Unable to parse given packet");
+					return null;
 			}
 		}
 	}
