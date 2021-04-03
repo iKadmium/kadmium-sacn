@@ -1,12 +1,13 @@
 ﻿using Kadmium_sACN.Layers;
 using System;
+using System.Buffers;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Xunit;
 
-namespace Kadmium_sACN.Test
+namespace Kadmium_sACN.Test.Layers
 {
 	public class DMPLayerTests
 	{
@@ -18,7 +19,7 @@ namespace Kadmium_sACN.Test
 			var bytes = GetDMPLayer(expectedProperties);
 
 			var dmpLayer = DMPLayer.Parse(bytes.ToArray());
-			Assert.Equal(DMPLayer.VECTOR_DMP_SET_PROPERTY, dmpLayer.Vector);
+			Assert.Equal(DMPLayerVector.VECTOR_DMP_SET_PROPERTY, dmpLayer.Vector);
 			Assert.Equal(propertyCount, dmpLayer.PropertyValues.Length);
 			Assert.Equal(expectedProperties.ToArray(), dmpLayer.PropertyValues);
 		}
@@ -28,11 +29,11 @@ namespace Kadmium_sACN.Test
 		{
 			List<byte> bytes = new List<byte>();
 			UInt16 propertyCount = 5;
-			byte length = (byte)(DMPLayer.MIN_LENGTH + (propertyCount - 1));
+			byte length = (byte)(DMPLayer.MinLength + propertyCount);
 			UInt16 expectedFlagsAndLength = (UInt16)(0x7 << 12 | length);
 			bytes.AddRange(new byte[] { 0x7 << 4, (length) }); // flags and length
-			byte expectedVector = DMPLayer.VECTOR_DMP_SET_PROPERTY;
-			bytes.Add(expectedVector); // Vector
+			DMPLayerVector expectedVector = DMPLayerVector.VECTOR_DMP_SET_PROPERTY;
+			bytes.Add((byte)expectedVector); // Vector
 			byte expectedAddressAndDataType = 25;
 			bytes.Add(expectedAddressAndDataType);
 
@@ -53,11 +54,11 @@ namespace Kadmium_sACN.Test
 		{
 			List<byte> bytes = new List<byte>();
 			UInt16 propertyCount = 5;
-			byte length = (byte)(DMPLayer.MIN_LENGTH + (propertyCount - 1));
+			byte length = (byte)(DMPLayer.MinLength + propertyCount);
 			UInt16 expectedFlagsAndLength = (UInt16)(0x7 << 12 | length);
 			bytes.AddRange(new byte[] { 0x7 << 4, (length) }); // flags and length
-			byte expectedVector = DMPLayer.VECTOR_DMP_SET_PROPERTY;
-			bytes.Add(expectedVector); // Vector
+			DMPLayerVector expectedVector = DMPLayerVector.VECTOR_DMP_SET_PROPERTY;
+			bytes.Add((byte)expectedVector); // Vector
 			byte expectedAddressAndDataType = DMPLayer.AddressTypeAndDataType;
 			bytes.Add(expectedAddressAndDataType);
 
@@ -78,11 +79,11 @@ namespace Kadmium_sACN.Test
 		{
 			List<byte> bytes = new List<byte>();
 			UInt16 propertyCount = 5;
-			byte length = (byte)(DMPLayer.MIN_LENGTH + (propertyCount - 1));
+			byte length = (byte)(DMPLayer.MinLength + propertyCount);
 			UInt16 expectedFlagsAndLength = (UInt16)(0x7 << 12 | length);
 			bytes.AddRange(new byte[] { 0x7 << 4, (length) }); // flags and length
-			byte expectedVector = DMPLayer.VECTOR_DMP_SET_PROPERTY;
-			bytes.Add(expectedVector); // Vector
+			DMPLayerVector expectedVector = DMPLayerVector.VECTOR_DMP_SET_PROPERTY;
+			bytes.Add((byte)expectedVector); // Vector
 			byte expectedAddressAndDataType = DMPLayer.AddressTypeAndDataType;
 			bytes.Add(expectedAddressAndDataType);
 
@@ -98,14 +99,32 @@ namespace Kadmium_sACN.Test
 			Assert.Null(dmpLayer);
 		}
 
+		[Fact]
+		public void When_WriteIsCalled_Then_TheDataIsCorrect()
+		{
+			var properties = Enumerable.Range(0, 200).Select(x => (byte)x).ToArray();
+
+			var dmpLayer = new DMPLayer()
+			{
+				PropertyValues = properties
+			};
+
+			var expectedBytes = GetDMPLayer(properties);
+
+			using var owner = MemoryPool<byte>.Shared.Rent(DMPLayer.MinLength + properties.Length);
+			var actualBytes = owner.Memory.Span.Slice(0, DMPLayer.MinLength + properties.Length);
+			dmpLayer.Write(actualBytes);
+			Assert.Equal(expectedBytes.ToArray(), actualBytes.ToArray());
+		}
+
 		public static List<byte> GetDMPLayer(IEnumerable<byte> properties)
 		{
 			List<byte> bytes = new List<byte>();
 			UInt16 propertyCount = (UInt16)properties.Count();
-			byte length = (byte)(DMPLayer.MIN_LENGTH + (propertyCount - 1));
+			byte length = (byte)(DMPLayer.MinLength + propertyCount);
 			bytes.AddRange(new byte[] { 0x7 << 4, (length) }); // flags and length
-			byte expectedVector = DMPLayer.VECTOR_DMP_SET_PROPERTY;
-			bytes.Add(expectedVector); // Vector
+			DMPLayerVector expectedVector = DMPLayerVector.VECTOR_DMP_SET_PROPERTY;
+			bytes.Add((byte)expectedVector); // Vector
 			byte expectedAddressAndDataType = DMPLayer.AddressTypeAndDataType;
 			bytes.Add(expectedAddressAndDataType);
 

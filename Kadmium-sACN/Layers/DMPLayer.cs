@@ -6,20 +6,48 @@ using System.Text;
 
 namespace Kadmium_sACN.Layers
 {
+	public enum DMPLayerVector
+	{
+		VECTOR_DMP_SET_PROPERTY = 0x02
+	}
+
 	public class DMPLayer : SACNLayer
 	{
-		public const byte VECTOR_DMP_SET_PROPERTY = 0x02;
-		public const int MIN_LENGTH = 12;
+		public const UInt16 MinLength = 11;
 
 		public const byte AddressTypeAndDataType = 0xa1;
 		public const UInt16 FirstPropertyAddress = 0x00;
 		public const UInt16 AddressIncrement = 0x01;
 
-		public byte Vector { get; set; }
+		public DMPLayerVector Vector { get; set; }
 		public byte StartCode { get; set; }
 		public byte[] PropertyValues { get; set; }
+		public UInt16 Length => (UInt16)(MinLength + PropertyValues.Length);
 
-		public override int Length => MIN_LENGTH + PropertyValues.Length;
+		public DMPLayer()
+		{
+			Vector = DMPLayerVector.VECTOR_DMP_SET_PROPERTY;
+		}
+
+		public void Write(Span<byte> bytes)
+		{
+			UInt16 pduLength = (UInt16)(MinLength + PropertyValues.Length);
+			BinaryPrimitives.WriteUInt16BigEndian(bytes, GetFlagsAndLength(pduLength));
+			bytes = bytes.Slice(sizeof(UInt16));
+			bytes[0] = (byte)Vector;
+			bytes = bytes.Slice(sizeof(byte));
+			bytes[0] = AddressTypeAndDataType;
+			bytes = bytes.Slice(sizeof(byte));
+			BinaryPrimitives.WriteUInt16BigEndian(bytes, FirstPropertyAddress);
+			bytes = bytes.Slice(sizeof(UInt16));
+			BinaryPrimitives.WriteUInt16BigEndian(bytes, AddressIncrement);
+			bytes = bytes.Slice(sizeof(UInt16));
+			BinaryPrimitives.WriteUInt16BigEndian(bytes, (UInt16)(PropertyValues.Length + 1));
+			bytes = bytes.Slice(sizeof(UInt16));
+			bytes[0] = StartCode;
+			bytes = bytes.Slice(sizeof(byte));
+			PropertyValues.CopyTo(bytes);
+		}
 
 		public static DMPLayer Parse(ReadOnlySpan<byte> bytes)
 		{
@@ -28,7 +56,7 @@ namespace Kadmium_sACN.Layers
 			var flagsAndLength = BinaryPrimitives.ReadUInt16BigEndian(bytes);
 			bytes = bytes.Slice(sizeof(UInt16));
 
-			dmpLayer.Vector = bytes[0];
+			dmpLayer.Vector = (DMPLayerVector)bytes[0];
 			bytes = bytes.Slice(sizeof(byte));
 
 			var addressTypeAndDataType = bytes[0];

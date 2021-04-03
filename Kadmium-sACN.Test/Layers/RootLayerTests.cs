@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Xunit;
 
-namespace Kadmium_sACN.Test
+namespace Kadmium_sACN.Test.Layers
 {
 	public class RootLayerTests
 	{
@@ -33,7 +33,7 @@ namespace Kadmium_sACN.Test
 		{
 			var expectedVector = RootLayerVector.VECTOR_ROOT_E131_DATA;
 			var expectedFlags = RootLayer.FLAGS;
-			var expectedLength = RootLayer.LENGTH - 16;
+			var expectedLength = RootLayer.Length - 16;
 
 			var bytes = new List<byte>
 			{
@@ -61,7 +61,7 @@ namespace Kadmium_sACN.Test
 		{
 			var expectedVector = RootLayerVector.VECTOR_ROOT_E131_DATA;
 			var expectedFlags = RootLayer.FLAGS;
-			var expectedLength = RootLayer.LENGTH - 16;
+			var expectedLength = RootLayer.Length - 16;
 
 			var bytes = new List<byte>
 			{
@@ -89,7 +89,7 @@ namespace Kadmium_sACN.Test
 		{
 			var expectedVector = RootLayerVector.VECTOR_ROOT_E131_DATA;
 			var expectedFlags = RootLayer.FLAGS;
-			var expectedLength = RootLayer.LENGTH - 16;
+			var expectedLength = RootLayer.Length - 16;
 
 			var bytes = new List<byte>
 			{
@@ -131,8 +131,8 @@ namespace Kadmium_sACN.Test
 				Vector = RootLayerVector.VECTOR_ROOT_E131_DATA
 			};
 
-			using var owner = MemoryPool<byte>.Shared.Rent(RootLayer.LENGTH);
-			var actualBytes = owner.Memory.Span.Slice(0, RootLayer.LENGTH);
+			using var owner = MemoryPool<byte>.Shared.Rent(RootLayer.Length);
+			var actualBytes = owner.Memory.Span.Slice(0, RootLayer.Length);
 			rootLayer.Write(actualBytes, 0);
 			Assert.Equal(expectedBytes, actualBytes.ToArray());
 		}
@@ -141,7 +141,7 @@ namespace Kadmium_sACN.Test
 		{
 			var expectedVector = vector;
 			var expectedFlags = RootLayer.FLAGS;
-			var expectedLength = RootLayer.LENGTH - 16;
+			var expectedLength = RootLayer.Length - 16;
 
 			var bytes = new List<byte>
 			{

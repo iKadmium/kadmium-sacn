@@ -15,7 +15,7 @@ namespace Kadmium_sACN.Layers.Framing
 	public abstract class FramingLayer : SACNLayer
 	{
 		public FramingLayerVector Vector { get; set; }
-		
+
 		public static FramingLayer Parse(ReadOnlySpan<byte> bytes, RootLayerVector rootLayerVector)
 		{
 			var vector = (FramingLayerVector)BinaryPrimitives.ReadUInt32BigEndian(bytes.Slice(sizeof(UInt16)));

@@ -1,20 +1,20 @@
 ﻿using Kadmium_sACN.Layers;
 using Kadmium_sACN.Layers.Framing;
 using System;
+using System.Buffers;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Xunit;
 
-namespace Kadmium_sACN.Test
+namespace Kadmium_sACN.Test.Layers
 {
 	public class DataPacketFramingLayerTests
 	{
 		[Fact]
 		public void Given_TheDataIsCorrect_When_ParseIsCalled_Then_TheDataIsParsedAsExpected()
 		{
-			var expectedLength = DataPacketFramingLayer.LENGTH;
 			var expectedVector = FramingLayerVector.VECTOR_E131_DATA_PACKET;
 			byte expectedPriority = 27;
 			UInt16 expectedSyncAddress = 25;
@@ -23,13 +23,12 @@ namespace Kadmium_sACN.Test
 			bool streamTerminated = true;
 			bool forceSynchronization = true;
 			byte expectedOptions = 0b0000_1110;
-			int universe = 258;
+			UInt16 universe = 258;
 			string expectedSourceName = "This is the source name";
 
-			var bytes = GetDataPacketFramingLayer(expectedSourceName, expectedPriority, expectedSyncAddress, expectedSequenceNumber, expectedOptions);
+			var bytes = GetDataPacketFramingLayer(expectedSourceName, expectedPriority, expectedSyncAddress, expectedSequenceNumber, expectedOptions, universe);
 
 			var framingLayer = DataPacketFramingLayer.Parse(bytes.ToArray());
-			Assert.Equal(expectedLength, framingLayer.Length);
 			Assert.Equal(expectedVector, framingLayer.Vector);
 			Assert.Equal(expectedPriority, framingLayer.Priority);
 			Assert.Equal(expectedSyncAddress, framingLayer.SynchronizationAddress);
@@ -60,10 +59,38 @@ namespace Kadmium_sACN.Test
 			Assert.Equal(expectedOptions, framingLayer.Options);
 		}
 
-		public static List<byte> GetDataPacketFramingLayer(string sourceName, byte priority, UInt16 syncAddress, byte sequenceNumber, byte options)
+		[Fact]
+		public void When_WriteIsCalled_Then_TheDataIsCorrect()
+		{
+			string sourceName = "My source name";
+			byte priority = 134;
+			UInt16 syncAddress = 1023;
+			byte sequenceNumber = 135;
+			byte options = 0;
+			UInt16 universe = 1953;
+
+			var framingLayer = new DataPacketFramingLayer()
+			{
+				SourceName = sourceName,
+				Priority = priority,
+				SynchronizationAddress = syncAddress,
+				SequenceNumber = sequenceNumber,
+				Options = options,
+				Universe = universe
+			};
+
+			var expectedBytes = GetDataPacketFramingLayer(sourceName, priority, syncAddress, sequenceNumber, options, universe);
+
+			using var owner = MemoryPool<byte>.Shared.Rent(DataPacketFramingLayer.Length);
+			var actualBytes = owner.Memory.Span.Slice(0, DataPacketFramingLayer.Length);
+			framingLayer.Write(actualBytes, 0);
+			Assert.Equal(expectedBytes.ToArray(), actualBytes.ToArray());
+		}
+
+		public static List<byte> GetDataPacketFramingLayer(string sourceName, byte priority, UInt16 syncAddress, byte sequenceNumber, byte options, UInt16 universe)
 		{
 			var bytes = new List<byte>(new byte[] {
-				(0x7 << 4), DataPacketFramingLayer.LENGTH, // flags and length
+				(0x7 << 4), DataPacketFramingLayer.Length, // flags and length
 				0x00, 0x00, 0x00, (byte)FramingLayerVector.VECTOR_E131_DATA_PACKET,
 			});
 
@@ -73,7 +100,7 @@ namespace Kadmium_sACN.Test
 			bytes.AddRange(new byte[] { (byte)((syncAddress & 0xFF00) >> 8), (byte)(syncAddress & 0xFF) });
 			bytes.Add(sequenceNumber);
 			bytes.Add(options);
-			bytes.AddRange(new byte[] { 1, 2 });
+			bytes.AddRange(new byte[] { (byte)((universe & 0xFF00) >> 8), (byte)(universe & 0xFF) });
 
 			return bytes;
 		}

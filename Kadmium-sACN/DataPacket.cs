@@ -11,8 +11,6 @@ namespace Kadmium_sACN
 		public DataPacketFramingLayer FramingLayer { get; set; }
 		public DMPLayer DMPLayer { get; set; }
 
-		public byte[] Properties => DMPLayer.PropertyValues;
-
 		public DataPacket()
 		{
 			RootLayer = new RootLayer();

@@ -10,21 +10,27 @@ namespace Kadmium_sACN
 	{
 		public RootLayer RootLayer { get; set; }
 
-		public SACNPacket Parse(ReadOnlySpan<byte> bytes)
+		public static SACNPacket Parse(ReadOnlySpan<byte> bytes)
 		{
 			RootLayer rootLayer = RootLayer.Parse(bytes);
-			bytes = bytes.Slice(rootLayer.Length);
+			if (rootLayer == null)
+			{
+				return null;
+			}
+			bytes = bytes.Slice(RootLayer.Length);
 
 			FramingLayer framingLayer = FramingLayer.Parse(bytes, rootLayer.Vector);
-			bytes = bytes.Slice(framingLayer.Length);
-
+			
 			switch(framingLayer)
 			{
 				case DataPacketFramingLayer dataLayer:
+					bytes = bytes.Slice(DataPacketFramingLayer.Length);
 					return DataPacket.Parse(bytes, rootLayer, dataLayer);
 				case SynchronizationPacketFramingLayer syncLayer:
+					bytes = bytes.Slice(SynchronizationPacketFramingLayer.Length);
 					return SynchronizationPacket.Parse(bytes, rootLayer, syncLayer);
 				case UniverseDiscoveryPacketFramingLayer discoveryLayer:
+					bytes = bytes.Slice(UniverseDiscoveryPacketFramingLayer.Length);
 					return UniverseDiscoveryPacket.Parse(bytes, rootLayer, discoveryLayer);
 				default:
 					return null;

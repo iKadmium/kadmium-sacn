@@ -15,7 +15,7 @@ namespace Kadmium_sACN.Layers
 	{
 		public const UInt16 PREAMBLE_SIZE =				0x0010;
 		public const UInt16 POSTAMBLE_SIZE =			0;
-		public const int LENGTH =						38;
+		public const int Length =						38;
 
 		public static readonly byte[] ACNIdentifier = new byte[]
 		{
@@ -24,11 +24,9 @@ namespace Kadmium_sACN.Layers
 
 		public RootLayerVector Vector { get; set; }
 		public byte[] CID { get; set; } = new byte[16];
-		public override int Length => LENGTH;
 		
 		public void Write(Span<byte> bytes, UInt16 remainingLength)
 		{
-			bytes = bytes.Slice(0, Length);
 			BinaryPrimitives.WriteUInt16BigEndian(bytes, PREAMBLE_SIZE);
 			bytes = bytes.Slice(sizeof(UInt16));
 			BinaryPrimitives.WriteUInt16BigEndian(bytes, POSTAMBLE_SIZE);
@@ -46,7 +44,7 @@ namespace Kadmium_sACN.Layers
 		public static RootLayer Parse(ReadOnlySpan<byte> bytes)
 		{
 			RootLayer rootLayer = new RootLayer();
-			bytes = bytes.Slice(0, rootLayer.Length);
+			bytes = bytes.Slice(0, RootLayer.Length);
 
 			var preambleSize = BinaryPrimitives.ReadUInt16BigEndian(bytes);
 			bytes = bytes.Slice(sizeof(UInt16));

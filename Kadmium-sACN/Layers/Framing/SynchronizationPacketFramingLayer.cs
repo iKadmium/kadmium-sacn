@@ -7,10 +7,28 @@ namespace Kadmium_sACN.Layers.Framing
 {
 	public class SynchronizationPacketFramingLayer : FramingLayer
 	{
-		public const int LENGTH = 11;
+		public const int Length = 11;
 		public byte SequenceNumber { get; set; }
 		public UInt16 SynchronizationAddress { get; set; }
-		public override int Length => LENGTH;
+
+		public SynchronizationPacketFramingLayer()
+		{
+			Vector = FramingLayerVector.VECTOR_E131_EXTENDED_SYNCHRONIZATION;
+		}
+
+		public void Write(Span<byte> bytes)
+		{
+			UInt16 pduLength = (UInt16)(Length);
+			BinaryPrimitives.WriteUInt16BigEndian(bytes, GetFlagsAndLength(pduLength));
+			bytes = bytes.Slice(sizeof(UInt16));
+			BinaryPrimitives.WriteUInt32BigEndian(bytes, (UInt32)Vector);
+			bytes = bytes.Slice(sizeof(UInt32));
+			bytes[0] = SequenceNumber;
+			bytes = bytes.Slice(sizeof(byte));
+			BinaryPrimitives.WriteUInt16BigEndian(bytes, SynchronizationAddress);
+			bytes = bytes.Slice(sizeof(UInt16));
+			bytes.Slice(0, 2).Fill(0); // reserved
+		}
 
 		public static SynchronizationPacketFramingLayer Parse(ReadOnlySpan<byte> bytes)
 		{

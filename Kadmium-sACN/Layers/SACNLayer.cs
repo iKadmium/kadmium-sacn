@@ -11,11 +11,9 @@ namespace Kadmium_sACN.Layers
 		public const byte FLAGS = 0x7;
 		public const UInt16 LengthMask = 0x0FFF;
 
-		public abstract int Length { get; }
-
-		protected UInt16 GetFlagsAndLength(UInt16 Length)
+		protected UInt16 GetFlagsAndLength(UInt16 length)
 		{
-			return (UInt16)((FLAGS << 12) | Length);
+			return (UInt16)((FLAGS << 12) | length);
 		}
 	}
 }

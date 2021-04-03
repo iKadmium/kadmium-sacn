@@ -11,18 +11,17 @@ namespace Kadmium_sACN.Layers.Framing
 		public const byte StreamTerminatedMask = 0b00000100;
 		public const byte ForceSynchronizationMask = 0b00001000;
 
-		public const int LENGTH = 77;
+		public const int Length = 77;
 
 		public string SourceName { get; set; }
-		public byte Priority { get; set; }
+		public byte Priority { get; set; } = 100;
 		public UInt16 SynchronizationAddress { get; set; }
 		public byte SequenceNumber { get; set; }
 		public bool PreviewData { get; set; }
 		public bool StreamTerminated { get; set; }
 		public bool ForceSynchronization { get; set; }
 		public UInt16 Universe { get; set; }
-		public override int Length => LENGTH;
-
+		
 		public byte Options
 		{
 			get
@@ -48,6 +47,35 @@ namespace Kadmium_sACN.Layers.Framing
 				StreamTerminated = (value & StreamTerminatedMask) != 0;
 				ForceSynchronization = (value & ForceSynchronizationMask) != 0;
 			}
+		}
+
+		public DataPacketFramingLayer()
+		{
+			Vector = FramingLayerVector.VECTOR_E131_DATA_PACKET;
+		}
+
+		public void Write(Span<byte> bytes, ushort remainingLength)
+		{
+			UInt16 pduLength = (UInt16)(remainingLength + Length);
+			BinaryPrimitives.WriteUInt16BigEndian(bytes, GetFlagsAndLength(pduLength));
+			bytes = bytes.Slice(sizeof(UInt16));
+			BinaryPrimitives.WriteUInt32BigEndian(bytes, (UInt32)Vector);
+			bytes = bytes.Slice(sizeof(UInt32));
+			var sourceNameBytes = Encoding.UTF8.GetBytes(SourceName);
+			sourceNameBytes.CopyTo(bytes);
+			bytes = bytes.Slice(sourceNameBytes.Length);
+			var paddingLength = 64 - sourceNameBytes.Length;
+			bytes.Slice(0, paddingLength).Fill(0);
+			bytes = bytes.Slice(paddingLength);
+			bytes[0] = Priority;
+			bytes = bytes.Slice(sizeof(byte));
+			BinaryPrimitives.WriteUInt16BigEndian(bytes, SynchronizationAddress);
+			bytes = bytes.Slice(sizeof(UInt16));
+			bytes[0] = SequenceNumber;
+			bytes = bytes.Slice(sizeof(byte));
+			bytes[0] = Options;
+			bytes = bytes.Slice(sizeof(byte));
+			BinaryPrimitives.WriteUInt16BigEndian(bytes, Universe);
 		}
 
 		public static DataPacketFramingLayer Parse(ReadOnlySpan<byte> bytes)
@@ -81,5 +109,7 @@ namespace Kadmium_sACN.Layers.Framing
 
 			return framingLayer;
 		}
+
+		
 	}
 }
