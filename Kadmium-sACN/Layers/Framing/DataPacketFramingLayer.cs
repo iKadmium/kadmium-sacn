@@ -13,14 +13,41 @@ namespace Kadmium_sACN.Layers.Framing
 
 		public const int Length = 77;
 
+		public const int Universe_MinValue = 1;
+		public const int Universe_MaxValue = 63999;
+
 		public string SourceName { get; set; }
-		public byte Priority { get; set; } = 100;
+		private byte priority = 100;
+		public byte Priority
+		{
+			get { return priority; }
+			set
+			{
+				if (value > 200)
+				{
+					throw new ArgumentOutOfRangeException("Priority may not exceed 200");
+				}
+				priority = value;
+			}
+		}
 		public UInt16 SynchronizationAddress { get; set; }
 		public byte SequenceNumber { get; set; }
 		public bool PreviewData { get; set; }
 		public bool StreamTerminated { get; set; }
 		public bool ForceSynchronization { get; set; }
-		public UInt16 Universe { get; set; }
+		private UInt16 universe;
+		public UInt16 Universe
+		{
+			get { return universe; }
+			set
+			{
+				if (value < Universe_MinValue || value > Universe_MaxValue)
+				{
+					throw new ArgumentOutOfRangeException($"Universe must be between {Universe_MinValue} and {Universe_MaxValue}");
+				}
+				universe = value;
+			}
+		}
 		
 		public byte Options
 		{
