@@ -25,6 +25,7 @@ namespace Kadmium_sACN
 			dataPacket.FramingLayer.SourceName = SourceName;
 			dataPacket.FramingLayer.SequenceNumber = SequenceNumber;
 			dataPacket.FramingLayer.Universe = universe;
+			dataPacket.FramingLayer.Priority = priority;
 			dataPacket.DMPLayer.StartCode = startCode;
 			dataPacket.DMPLayer.PropertyValues = properties;
 

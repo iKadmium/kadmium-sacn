@@ -74,11 +74,21 @@ namespace Kadmium_sACN.Test
 		}
 
 		[Fact]
+		public void When_NewDataPacketsAreCreated_Then_ThePriorityIsSet()
+		{
+			var expectedPriority = (byte)195;
+			var sacnPacketFactory = GetPacketFactory();
+			var packet = sacnPacketFactory.CreateDataPacket(1, new byte[] { 0 }, priority: expectedPriority);
+
+			Assert.Equal(expectedPriority, packet.FramingLayer.Priority);
+		}
+
+		[Fact]
 		public void When_NewDataPacketsAreCreated_Then_TheStartCodeIsSet()
 		{
 			var expectedStartCode = (byte)202;
 			var sacnPacketFactory = GetPacketFactory();
-			var packet = sacnPacketFactory.CreateDataPacket(1, new byte[] { 0 }, expectedStartCode);
+			var packet = sacnPacketFactory.CreateDataPacket(1, new byte[] { 0 }, startCode: expectedStartCode);
 
 			Assert.Equal(expectedStartCode, packet.DMPLayer.StartCode);
 		}
