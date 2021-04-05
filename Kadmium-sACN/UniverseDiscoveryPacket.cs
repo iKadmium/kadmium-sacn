@@ -8,6 +8,9 @@ namespace Kadmium_sACN
 {
 	public class UniverseDiscoveryPacket : SacnPacket
 	{
+		public const int PageSize = 512;
+		public const UInt16 DiscoveryUniverse = 64214;
+
 		public UniverseDiscoveryPacketFramingLayer FramingLayer { get; set; }
 		public UniverseDiscoveryLayer UniverseDiscoveryLayer { get; set; }
 		public override int Length => RootLayer.Length + UniverseDiscoveryPacketFramingLayer.Length + UniverseDiscoveryLayer.Length;

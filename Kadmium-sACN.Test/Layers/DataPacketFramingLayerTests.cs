@@ -91,21 +91,21 @@ namespace Kadmium_sACN.Test.Layers
 		public void When_TheUniverseIsTooHigh_Then_AnExceptionIsThrown()
 		{
 			var framingLayer = new DataPacketFramingLayer();
-			Assert.Throws<ArgumentOutOfRangeException>(() => framingLayer.Universe = DataPacketFramingLayer.Universe_MaxValue + 1);
+			Assert.Throws<ArgumentOutOfRangeException>(() => framingLayer.Universe = Constants.Universe_MaxValue + 1);
 		}
 
 		[Fact]
 		public void When_TheUniverseIsTooLow_Then_AnExceptionIsThrown()
 		{
 			var framingLayer = new DataPacketFramingLayer();
-			Assert.Throws<ArgumentOutOfRangeException>(() => framingLayer.Universe = DataPacketFramingLayer.Universe_MinValue - 1);
+			Assert.Throws<ArgumentOutOfRangeException>(() => framingLayer.Universe = Constants.Universe_MinValue - 1);
 		}
 
 		[Fact]
 		public void When_ThePriorityIsTooHigh_Then_AnExceptionIsThrown()
 		{
 			var framingLayer = new DataPacketFramingLayer();
-			Assert.Throws<ArgumentOutOfRangeException>(() => framingLayer.Priority = DataPacketFramingLayer.Priority_MaxValue + 1);
+			Assert.Throws<ArgumentOutOfRangeException>(() => framingLayer.Priority = Constants.Priority_MaxValue + 1);
 		}
 
 		public static List<byte> GetDataPacketFramingLayer(string sourceName, byte priority, UInt16 syncAddress, byte sequenceNumber, byte options, UInt16 universe)

@@ -2,6 +2,7 @@
 using System.Buffers.Binary;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.Linq;
 using System.Text;
 
 namespace Kadmium_sACN.Layers
@@ -21,8 +22,8 @@ namespace Kadmium_sACN.Layers
 
 		public DMPLayerVector Vector { get; set; }
 		public byte StartCode { get; set; }
-		public byte[] PropertyValues { get; set; }
-		public UInt16 Length => (UInt16)(MinLength + PropertyValues.Length);
+		public IEnumerable<byte> PropertyValues { get; set; }
+		public UInt16 Length => (UInt16)(MinLength + PropertyValues.Count());
 
 		public DMPLayer()
 		{
@@ -31,8 +32,7 @@ namespace Kadmium_sACN.Layers
 
 		public void Write(Span<byte> bytes)
 		{
-			UInt16 pduLength = (UInt16)(MinLength + PropertyValues.Length);
-			BinaryPrimitives.WriteUInt16BigEndian(bytes, GetFlagsAndLength(pduLength));
+			BinaryPrimitives.WriteUInt16BigEndian(bytes, GetFlagsAndLength(Length));
 			bytes = bytes.Slice(sizeof(UInt16));
 			bytes[0] = (byte)Vector;
 			bytes = bytes.Slice(sizeof(byte));
@@ -42,11 +42,11 @@ namespace Kadmium_sACN.Layers
 			bytes = bytes.Slice(sizeof(UInt16));
 			BinaryPrimitives.WriteUInt16BigEndian(bytes, AddressIncrement);
 			bytes = bytes.Slice(sizeof(UInt16));
-			BinaryPrimitives.WriteUInt16BigEndian(bytes, (UInt16)(PropertyValues.Length + 1));
+			BinaryPrimitives.WriteUInt16BigEndian(bytes, (UInt16)(PropertyValues.Count() + 1));
 			bytes = bytes.Slice(sizeof(UInt16));
 			bytes[0] = StartCode;
 			bytes = bytes.Slice(sizeof(byte));
-			PropertyValues.CopyTo(bytes);
+			PropertyValues.ToArray().CopyTo(bytes);
 		}
 
 		public static DMPLayer Parse(ReadOnlySpan<byte> bytes)
@@ -86,9 +86,11 @@ namespace Kadmium_sACN.Layers
 			dmpLayer.StartCode = bytes[0];
 			bytes = bytes.Slice(sizeof(byte));
 
-			dmpLayer.PropertyValues = new byte[propertyValueCount - 1];
-			var propertyValues = bytes.Slice(0, propertyValueCount - 1);
-			propertyValues.CopyTo(dmpLayer.PropertyValues);
+			var propertyValues = new byte[propertyValueCount - 1];
+
+			var propertyValuesSlice = bytes.Slice(0, propertyValueCount - 1);
+			propertyValuesSlice.CopyTo(propertyValues);
+			dmpLayer.PropertyValues = propertyValues;
 
 			return dmpLayer;
 		}
