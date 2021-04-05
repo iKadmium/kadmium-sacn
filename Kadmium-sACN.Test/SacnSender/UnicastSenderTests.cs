@@ -14,12 +14,52 @@ namespace Kadmium_sACN.Test.SacnSender
 	public class UnicastSenderTests
 	{
 		[Fact]
-		public async Task When_UnicastSendIsCalled_Then_ThePacketIsSent()
+		public async Task Given_ThePacketIsADataPacket_When_UnicastSendIsCalled_Then_ThePacketIsSent()
 		{
 			var expectedAddress = new IPAddress(new byte[] { 1, 2, 3, 4 });
 			var packet = new DataPacket();
 			packet.DMPLayer.PropertyValues = new byte[] { 1, 2, 3, 4 };
 			packet.FramingLayer.SourceName = "Source";
+			byte[] expectedBytes = new byte[packet.Length];
+			packet.Write(expectedBytes);
+
+			var udpWrapper = Mock.Of<IUdpWrapper>();
+			var sender = new UnicastSacnSender(udpWrapper, expectedAddress);
+			await sender.Send(packet);
+
+			Mock.Get(udpWrapper)
+				.Verify(x => x.Send(
+					It.Is<IPEndPoint>(x => x.Address == expectedAddress && x.Port == 5568),
+					It.Is<ReadOnlyMemory<byte>>(x => x.ToArray().SequenceEqual(expectedBytes))
+				));
+		}
+
+		[Fact]
+		public async Task Given_ThePacketIsUniverseDiscoveryPacket_When_UnicastSendIsCalled_Then_ThePacketIsSent()
+		{
+			var expectedAddress = new IPAddress(new byte[] { 1, 2, 3, 4 });
+			var packet = new UniverseDiscoveryPacket();
+			packet.UniverseDiscoveryLayer.Universes = new UInt16[] { 1, 2, 3, 4 };
+			packet.FramingLayer.SourceName = "Source";
+			byte[] expectedBytes = new byte[packet.Length];
+			packet.Write(expectedBytes);
+
+			var udpWrapper = Mock.Of<IUdpWrapper>();
+			var sender = new UnicastSacnSender(udpWrapper, expectedAddress);
+			await sender.Send(packet);
+
+			Mock.Get(udpWrapper)
+				.Verify(x => x.Send(
+					It.Is<IPEndPoint>(x => x.Address == expectedAddress && x.Port == 5568),
+					It.Is<ReadOnlyMemory<byte>>(x => x.ToArray().SequenceEqual(expectedBytes))
+				));
+		}
+
+		[Fact]
+		public async Task Given_ThePacketIsASynchronizationPacket_When_UnicastSendIsCalled_Then_ThePacketIsSent()
+		{
+			var expectedAddress = new IPAddress(new byte[] { 1, 2, 3, 4 });
+			var packet = new SynchronizationPacket();
 			byte[] expectedBytes = new byte[packet.Length];
 			packet.Write(expectedBytes);
 
