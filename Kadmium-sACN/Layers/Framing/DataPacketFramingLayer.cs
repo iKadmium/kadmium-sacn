@@ -15,6 +15,7 @@ namespace Kadmium_sACN.Layers.Framing
 
 		public const int Universe_MinValue = 1;
 		public const int Universe_MaxValue = 63999;
+		public const int Priority_MaxValue = 200;
 
 		public string SourceName { get; set; }
 		private byte priority = 100;
@@ -23,9 +24,9 @@ namespace Kadmium_sACN.Layers.Framing
 			get { return priority; }
 			set
 			{
-				if (value > 200)
+				if (value > Priority_MaxValue)
 				{
-					throw new ArgumentOutOfRangeException("Priority may not exceed 200");
+					throw new ArgumentOutOfRangeException($"Priority may not exceed {Priority_MaxValue}");
 				}
 				priority = value;
 			}
@@ -75,6 +76,8 @@ namespace Kadmium_sACN.Layers.Framing
 				ForceSynchronization = (value & ForceSynchronizationMask) != 0;
 			}
 		}
+
+		
 
 		public DataPacketFramingLayer()
 		{

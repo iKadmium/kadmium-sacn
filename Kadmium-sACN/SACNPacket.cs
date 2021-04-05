@@ -6,11 +6,13 @@ using System.Text;
 
 namespace Kadmium_sACN
 {
-	public abstract class SACNPacket
+	public abstract class SacnPacket
 	{
 		public RootLayer RootLayer { get; set; }
+		public abstract int Length { get; }
+		public abstract void Write(Span<byte> bytes);
 
-		public static SACNPacket Parse(ReadOnlySpan<byte> bytes)
+		public static SacnPacket Parse(ReadOnlySpan<byte> bytes)
 		{
 			RootLayer rootLayer = RootLayer.Parse(bytes);
 			if (rootLayer == null)

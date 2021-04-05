@@ -17,7 +17,7 @@
   </PropertyGroup>
 	
   <ItemGroup>
-    <PackageReference Include="Kadmium-Udp" Version="0.4.0" />
+    <PackageReference Include="Kadmium-Udp" Version="1.0.0" />
     <PackageReference Include="System.Memory" Version="4.5.4" />
 	<InternalsVisibleTo Include="Kadmium-sACN.Test" />
 	<InternalsVisibleTo Include="DynamicProxyGenAssembly2" />
