@@ -2,7 +2,7 @@ name: Publish to Nuget
 
 on:
   push:
-    branches: [ main ]
+    branches: [ master ]
 
 jobs:
   publish:
