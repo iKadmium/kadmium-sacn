@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Kadmium_sACN.SacnReceiver;
+using Kadmium_sACN.SacnSender;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -14,15 +16,15 @@ namespace Kadmium_sACN.Test
 		[Fact]
 		public async Task When_ListeningAndSendingUnicastWithIPV4_Then_MessagesAreSentAndReceived()
 		{
-			using (SacnSender sender = new SacnSender())
+			var hostname = Dns.GetHostName();
+			var ipAddresses = await Dns.GetHostAddressesAsync(hostname);
+			var address = ipAddresses.First(x => x.AddressFamily == AddressFamily.InterNetwork);
+
+			using (var sender = new UnicastSacnSender(address))
 			{
-				using (SacnReceiver receiver = new SacnReceiver())
+				using (var receiver = new UnicastSacnReceiver())
 				{
 					DataPacket received = null;
-
-					var hostname = Dns.GetHostName();
-					var ipAddresses = await Dns.GetHostAddressesAsync(hostname);
-					var address = ipAddresses.First(x => x.AddressFamily == AddressFamily.InterNetwork);
 
 					receiver.OnDataPacketReceived += (sender, packet) =>
 					{
@@ -35,7 +37,7 @@ namespace Kadmium_sACN.Test
 					packet.FramingLayer.Universe = 25;
 					packet.DMPLayer.PropertyValues = new byte[] { 1, 2, 3, 4 };
 
-					await sender.UnicastSend(address, packet);
+					await sender.Send(packet);
 					await Task.Delay(250);
 					Assert.NotNull(received);
 				}
@@ -45,15 +47,15 @@ namespace Kadmium_sACN.Test
 		[Fact]
 		public async Task When_ListeningAndSendingUnicastWithIPV6_Then_MessagesAreSentAndReceived()
 		{
-			using (SacnSender sender = new SacnSender())
+			var hostname = Dns.GetHostName();
+			var ipAddresses = await Dns.GetHostAddressesAsync(hostname);
+			var address = ipAddresses.First(x => x.AddressFamily == AddressFamily.InterNetworkV6);
+
+			using (var sender = new UnicastSacnSender(address))
 			{
-				using (SacnReceiver receiver = new SacnReceiver())
+				using (var receiver = new UnicastSacnReceiver())
 				{
 					DataPacket received = null;
-
-					var hostname = Dns.GetHostName();
-					var ipAddresses = await Dns.GetHostAddressesAsync(hostname);
-					var address = ipAddresses.First(x => x.AddressFamily == AddressFamily.InterNetworkV6);
 
 					receiver.OnDataPacketReceived += (sender, packet) =>
 					{
@@ -66,7 +68,7 @@ namespace Kadmium_sACN.Test
 					packet.FramingLayer.Universe = 25;
 					packet.DMPLayer.PropertyValues = new byte[] { 1, 2, 3, 4 };
 
-					await sender.UnicastSend(address, packet);
+					await sender.Send(packet);
 					await Task.Delay(250);
 					Assert.NotNull(received);
 				}
@@ -77,9 +79,9 @@ namespace Kadmium_sACN.Test
 		public async Task When_ListeningAndSendingMulticastOnIPV4_Then_MessagesAreSentAndReceived()
 		{
 			UInt16 universe = 1;
-			using (SacnSender sender = new SacnSender())
+			using (var sender = new MulticastSacnSenderIPV4())
 			{
-				using (SacnReceiver receiver = new SacnReceiver())
+				using (var receiver = new MulticastSacnReceiverIPV4())
 				{
 					DataPacket received = null;
 
@@ -98,7 +100,7 @@ namespace Kadmium_sACN.Test
 					packet.FramingLayer.Universe = universe;
 					packet.DMPLayer.PropertyValues = new byte[] { 1, 2, 3, 4 };
 
-					await sender.MulticastSendIPV4(universe, packet);
+					await sender.Send(packet);
 					await Task.Delay(250);
 					Assert.NotNull(received);
 				}
@@ -109,9 +111,9 @@ namespace Kadmium_sACN.Test
 		public async Task When_ListeningAndSendingMulticastOnIPV6_Then_MessagesAreSentAndReceived()
 		{
 			UInt16 universe = 1;
-			using (SacnSender sender = new SacnSender())
+			using (var sender = new MulticastSacnSenderIPV6())
 			{
-				using (SacnReceiver receiver = new SacnReceiver())
+				using (var receiver = new MulticastSacnReceiverIPV6())
 				{
 					DataPacket received = null;
 
@@ -130,7 +132,7 @@ namespace Kadmium_sACN.Test
 					packet.FramingLayer.Universe = universe;
 					packet.DMPLayer.PropertyValues = new byte[] { 1, 2, 3, 4 };
 
-					await sender.MulticastSendIPV6(universe, packet);
+					await sender.Send(packet);
 					await Task.Delay(250);
 					Assert.NotNull(received);
 				}

@@ -3,11 +3,10 @@ using System.Collections.Generic;
 using System.Net;
 using System.Text;
 
-namespace Kadmium_sACN
+namespace Kadmium_sACN.MulticastAddressProvider
 {
 	public interface ISacnMulticastAddressProvider
 	{
-		IPAddress GetIPV4MulticastAddress(UInt16 universe);
-		IPAddress GetIPV6MulticastAddress(UInt16 universe);
+		IPAddress GetMulticastAddress(UInt16 universe);
 	}
 }

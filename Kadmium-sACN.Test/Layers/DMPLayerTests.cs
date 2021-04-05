@@ -20,7 +20,7 @@ namespace Kadmium_sACN.Test.Layers
 
 			var dmpLayer = DMPLayer.Parse(bytes.ToArray());
 			Assert.Equal(DMPLayerVector.VECTOR_DMP_SET_PROPERTY, dmpLayer.Vector);
-			Assert.Equal(propertyCount, dmpLayer.PropertyValues.Length);
+			Assert.Equal(propertyCount, dmpLayer.PropertyValues.Count());
 			Assert.Equal(expectedProperties.ToArray(), dmpLayer.PropertyValues);
 		}
 

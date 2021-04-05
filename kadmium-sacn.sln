@@ -5,7 +5,11 @@ VisualStudioVersion = 16.0.31025.194
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Kadmium-sACN", "Kadmium-sACN\Kadmium-sACN.csproj", "{21DF3CAD-01CC-4874-B0C4-BFB45BD9D046}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kadmium-sACN.Test", "Kadmium-sACN.Test\Kadmium-sACN.Test.csproj", "{5F7609A7-E75D-4EDE-AE6E-E41BAD125B5C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Kadmium-sACN.Test", "Kadmium-sACN.Test\Kadmium-sACN.Test.csproj", "{5F7609A7-E75D-4EDE-AE6E-E41BAD125B5C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SacnSender", "SacnSender\SacnSender.csproj", "{E582FA6A-F75A-470D-9179-C7FD3E479FBE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SacnViewer", "SacnViewer\SacnViewer.csproj", "{FC09A689-ABC0-42FE-A854-708C8ED86829}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +25,14 @@ Global
 		{5F7609A7-E75D-4EDE-AE6E-E41BAD125B5C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5F7609A7-E75D-4EDE-AE6E-E41BAD125B5C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5F7609A7-E75D-4EDE-AE6E-E41BAD125B5C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E582FA6A-F75A-470D-9179-C7FD3E479FBE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E582FA6A-F75A-470D-9179-C7FD3E479FBE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E582FA6A-F75A-470D-9179-C7FD3E479FBE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E582FA6A-F75A-470D-9179-C7FD3E479FBE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FC09A689-ABC0-42FE-A854-708C8ED86829}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FC09A689-ABC0-42FE-A854-708C8ED86829}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FC09A689-ABC0-42FE-A854-708C8ED86829}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FC09A689-ABC0-42FE-A854-708C8ED86829}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

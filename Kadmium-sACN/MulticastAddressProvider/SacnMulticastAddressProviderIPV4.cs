@@ -4,22 +4,14 @@ using System.Collections.Generic;
 using System.Net;
 using System.Text;
 
-namespace Kadmium_sACN
+namespace Kadmium_sACN.MulticastAddressProvider
 {
-	public class SacnMulticastAddressProvider : ISacnMulticastAddressProvider
+	public class SacnMulticastAddressProviderIPV4 : ISacnMulticastAddressProvider
 	{
-		public IPAddress GetIPV4MulticastAddress(UInt16 universe)
+		public IPAddress GetMulticastAddress(UInt16 universe)
 		{
 			var universeBytes = GetUniverseBytes(universe);
 			IPAddress address = new IPAddress(new byte[] { 239, 255, universeBytes[0], universeBytes[1] });
-			return address;
-		}
-
-		public IPAddress GetIPV6MulticastAddress(UInt16 universe)
-		{
-			var universeBytes = GetUniverseBytes(universe);
-			string ipString = $"FF18::83:00:{universeBytes[0].ToString("X2")}:{universeBytes[1].ToString("X2")}";
-			IPAddress address = IPAddress.Parse(ipString);
 			return address;
 		}
 

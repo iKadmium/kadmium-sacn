@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Buffers.Binary;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace Kadmium_sACN.Layers
@@ -17,8 +18,8 @@ namespace Kadmium_sACN.Layers
 		public UniverseDiscoveryLayerVector Vector { get; set; }
 		public byte Page { get; set; }
 		public byte LastPage { get; set; }
-		public UInt16[] Universes { get; set; }
-		public UInt16 Length => (UInt16)(MinLength + (Universes.Length << 1));
+		public IEnumerable<UInt16> Universes { get; set; }
+		public UInt16 Length => (UInt16)(MinLength + (Universes.Count() << 1));
 
 		public UniverseDiscoveryLayer()
 		{
@@ -27,8 +28,7 @@ namespace Kadmium_sACN.Layers
 
 		public void Write(Span<byte> bytes)
 		{
-			UInt16 pduLength = (UInt16)(MinLength + (Universes.Length << 1));
-			BinaryPrimitives.WriteUInt16BigEndian(bytes, GetFlagsAndLength(pduLength));
+			BinaryPrimitives.WriteUInt16BigEndian(bytes, GetFlagsAndLength(Length));
 			bytes = bytes.Slice(sizeof(UInt16));
 			BinaryPrimitives.WriteUInt32BigEndian(bytes, (UInt32)Vector);
 			bytes = bytes.Slice(sizeof(UInt32));
@@ -66,13 +66,15 @@ namespace Kadmium_sACN.Layers
 
 			var listLength = pduLength - 8;
 			var universeCount = listLength / sizeof(UInt16);
-			discoveryLayer.Universes = new UInt16[universeCount];
+			var universes = new UInt16[universeCount];
 
 			for (int i = 0; i < universeCount; i++)
 			{
-				discoveryLayer.Universes[i] = BinaryPrimitives.ReadUInt16BigEndian(bytes);
+				universes[i] = BinaryPrimitives.ReadUInt16BigEndian(bytes);
 				bytes = bytes.Slice(sizeof(UInt16));
 			}
+
+			discoveryLayer.Universes = universes;
 
 			return discoveryLayer;
 		}

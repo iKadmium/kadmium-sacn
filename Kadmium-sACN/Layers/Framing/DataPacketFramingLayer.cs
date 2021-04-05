@@ -13,20 +13,17 @@ namespace Kadmium_sACN.Layers.Framing
 
 		public const int Length = 77;
 
-		public const int Universe_MinValue = 1;
-		public const int Universe_MaxValue = 63999;
-		public const int Priority_MaxValue = 200;
 
 		public string SourceName { get; set; }
-		private byte priority = 100;
+		private byte priority = Constants.Priority_Default;
 		public byte Priority
 		{
 			get { return priority; }
 			set
 			{
-				if (value > Priority_MaxValue)
+				if (value > Constants.Priority_MaxValue)
 				{
-					throw new ArgumentOutOfRangeException($"Priority may not exceed {Priority_MaxValue}");
+					throw new ArgumentOutOfRangeException($"Priority may not exceed {Constants.Priority_MaxValue}");
 				}
 				priority = value;
 			}
@@ -42,9 +39,9 @@ namespace Kadmium_sACN.Layers.Framing
 			get { return universe; }
 			set
 			{
-				if (value < Universe_MinValue || value > Universe_MaxValue)
+				if (value < Constants.Universe_MinValue || value > Constants.Universe_MaxValue)
 				{
-					throw new ArgumentOutOfRangeException($"Universe must be between {Universe_MinValue} and {Universe_MaxValue}");
+					throw new ArgumentOutOfRangeException($"Universe must be between {Constants.Universe_MinValue} and {Constants.Universe_MaxValue}");
 				}
 				universe = value;
 			}
