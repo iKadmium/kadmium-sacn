@@ -6,7 +6,7 @@ An sACN library for .NET Standard 2.0
 
 ## Usage
 ### Sending sACN packets
-```
+```c#
 byte[] cid = new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 };
 UInt16 universe = 1;
 string sourceName = "My lovely source";
@@ -20,7 +20,7 @@ await sacnSender.Send(packet);
 
 It's also good manners to send Universe Discovery packets every 10 seconds.
 
-```
+```c#
 using Timer timer = new Timer(10000);
 timer.Elapsed += async (sender, e) =>
 {
@@ -34,7 +34,7 @@ timer.Start();
 ```
 
 ### Listening for sACN Packets
-```
+```c#
 using var receiver = new MulticastSacnReceiverIPV4(); // IPv6 is also supported
 receiver.OnDataPacketReceived += (sender, packet) =>
 {
