@@ -7,10 +7,10 @@ using System.Text;
 
 namespace Kadmium_sACN.SacnReceiver
 {
-	public abstract class MulticastSacnReceiver : SacnReceiver
+	public abstract class MulticastSacnReceiver : SacnReceiver, IMulticastSacnReceiver
 	{
 		private ISacnMulticastAddressProvider MulticastAddressProvider { get; }
-		
+
 		protected MulticastSacnReceiver(IUdpWrapper udpWrapper, ISacnMulticastAddressProvider multicastAddressProvider) : base(udpWrapper)
 		{
 			MulticastAddressProvider = multicastAddressProvider;
