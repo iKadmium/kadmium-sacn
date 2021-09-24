@@ -4,6 +4,11 @@ An sACN library for .NET Standard 2.0
 [![codecov](https://codecov.io/gh/iKadmium/kadmium-sacn/branch/master/graph/badge.svg?token=ZSK119NBC5)](https://codecov.io/gh/iKadmium/kadmium-sacn)
 ![build status](https://github.com/iKadmium/kadmium-sacn/actions/workflows/publish.yml/badge.svg)
 
+## Installation
+```
+dotnet add package kadmium-sacn
+```
+
 ## Usage
 ### Sending sACN packets
 ```c#
