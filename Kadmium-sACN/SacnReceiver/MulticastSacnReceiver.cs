@@ -33,5 +33,23 @@ namespace Kadmium_sACN.SacnReceiver
 
 			UdpWrapper.JoinMulticastGroup(MulticastAddressProvider.GetMulticastAddress(universe));
 		}
+
+		public void DropMulticastGroups(IEnumerable<ushort> universes)
+		{
+			foreach (var universe in universes)
+			{
+				DropMulticastGroup(universe);
+			}
+		}
+
+		public void DropMulticastGroup(ushort universe)
+		{
+			if (universe < Constants.Universe_MinValue || universe > Constants.Universe_MaxValue)
+			{
+				throw new ArgumentOutOfRangeException($"Universe must be between {Constants.Universe_MinValue} and {Constants.Universe_MaxValue} inclusive");
+			}
+
+			UdpWrapper.DropMulticastGroup(MulticastAddressProvider.GetMulticastAddress(universe));
+		}
 	}
 }
