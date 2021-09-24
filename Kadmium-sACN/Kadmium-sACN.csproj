@@ -9,7 +9,7 @@
     <Title>Kadmium sACN</Title>
     <Description>A fairly lightweight sACN package for .Net Standard</Description>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <Version>2.0.0</Version>
+    <Version>2.0.1</Version>
     <Authors>Jesse Higginson</Authors>
     <PackageProjectUrl>https://github.com/iKadmium/kadmium-sacn</PackageProjectUrl>
     <RepositoryUrl>https://github.com/iKadmium/kadmium-sacn.git</RepositoryUrl>
