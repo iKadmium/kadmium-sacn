@@ -9,16 +9,16 @@ using System.Text;
 
 namespace Kadmium_sACN.SacnReceiver
 {
-	public abstract class SacnReceiver : IDisposable
+	public abstract class SacnReceiver : IDisposable, ISacnReceiver
 	{
 		protected IUdpWrapper UdpWrapper { get; }
-		
+
 		public event EventHandler<DataPacket> OnDataPacketReceived;
 		public event EventHandler<SynchronizationPacket> OnSynchronizationPacketReceived;
 		public event EventHandler<UniverseDiscoveryPacket> OnUniverseDiscoveryPacketReceived;
 
 		public IPEndPoint HostEndPoint => UdpWrapper.HostEndPoint;
-		
+
 		protected SacnReceiver(IUdpWrapper udpWrapper)
 		{
 			UdpWrapper = udpWrapper;
