@@ -10,11 +10,11 @@ namespace Kadmium_sACN.SacnReceiver
 {
 	public class MulticastSacnReceiverIPV6 : MulticastSacnReceiver
 	{
-		internal MulticastSacnReceiverIPV6(IUdpWrapper udpWrapper, ISacnMulticastAddressProvider multicastAddressProvider) : base(udpWrapper, multicastAddressProvider)
+		internal MulticastSacnReceiverIPV6(IUdpPipeline udpPipeline, ISacnMulticastAddressProvider multicastAddressProvider) : base(udpPipeline, multicastAddressProvider)
 		{
 		}
 
-		public MulticastSacnReceiverIPV6() : base(new UdpWrapper(), new SacnMulticastAddressProviderIPV6())
+		public MulticastSacnReceiverIPV6() : base(new UdpPipeline(AddressFamily.InterNetworkV6), new SacnMulticastAddressProviderIPV6())
 		{
 		}
 

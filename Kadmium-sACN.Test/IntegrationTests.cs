@@ -53,7 +53,7 @@ namespace Kadmium_sACN.Test
 
 			using (var sender = new UnicastSacnSender(address))
 			{
-				using (var receiver = new UnicastSacnReceiver())
+				using (var receiver = new UnicastSacnReceiver(AddressFamily.InterNetworkV6))
 				{
 					DataPacket received = null;
 
@@ -119,12 +119,15 @@ namespace Kadmium_sACN.Test
 
 					var hostname = Dns.GetHostName();
 					var ipAddresses = await Dns.GetHostAddressesAsync(hostname);
+					var address = ipAddresses.First(x => x.AddressFamily == AddressFamily.InterNetworkV6);
 
 					receiver.OnDataPacketReceived += (sender, packet) =>
 					{
 						received = packet;
 					};
-					receiver.Listen(IPAddress.IPv6Any);
+					receiver.Listen(address);
+					await Task.Delay(250);
+					Assert.Equal(address, receiver.HostEndPoint.Address);
 					receiver.JoinMulticastGroup(universe);
 
 					var packet = new DataPacket();

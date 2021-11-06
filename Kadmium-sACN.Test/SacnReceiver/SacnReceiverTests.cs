@@ -2,6 +2,7 @@
 using Moq;
 using System;
 using System.Collections.Generic;
+using System.IO.Pipelines;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
@@ -15,7 +16,7 @@ namespace Kadmium_sACN.Test.SacnReceiver
 	{
 		private class TestSacnReceiver : Kadmium_sACN.SacnReceiver.SacnReceiver
 		{
-			public TestSacnReceiver(IUdpWrapper udpWrapper) : base(udpWrapper)
+			public TestSacnReceiver(IUdpPipeline udpPipeline) : base(udpPipeline)
 			{
 			}
 
@@ -26,20 +27,26 @@ namespace Kadmium_sACN.Test.SacnReceiver
 		}
 
 		[Fact]
-		public void When_TheServerIsDisposed_Then_TheUdpWrapperIsDisposed()
+		public void When_TheServerIsDisposed_Then_TheudpPipelineIsDisposed()
 		{
-			var udpWrapper = Mock.Of<IUdpWrapper>();
-			var server = new TestSacnReceiver(udpWrapper);
+			var udpPipeline = Mock.Of<IUdpPipeline>();
+			var server = new TestSacnReceiver(udpPipeline);
 			server.Dispose();
-			Mock.Get(udpWrapper)
+			Mock.Get(udpPipeline)
 				.Verify(x => x.Dispose());
 		}
 
 		[Fact]
 		public async Task When_ADataPacketIsReceived_Then_TheEventIsTriggered()
 		{
-			var udpWrapper = Mock.Of<IUdpWrapper>();
-			var server = new TestSacnReceiver(udpWrapper);
+			PipeWriter writer = null;
+			var udpPipeline = Mock.Of<IUdpPipeline>();
+
+			Mock.Get(udpPipeline)
+				.Setup(x => x.ListenAsync(It.IsAny<PipeWriter>(), It.IsAny<IPEndPoint>()))
+				.Callback<PipeWriter, IPEndPoint>((pipeWriter, endPoint) => writer = pipeWriter);
+
+			var server = new TestSacnReceiver(udpPipeline);
 			server.Listen(IPAddress.Any);
 			DataPacket receivedPacket = null;
 
@@ -57,8 +64,7 @@ namespace Kadmium_sACN.Test.SacnReceiver
 
 			var buffer = DataPacketTests.GetDataPacket(CID, sourceName, universe, properties).ToArray();
 
-			Mock.Get(udpWrapper).Raise(x => x.OnPacketReceived += null, null, new UdpReceiveResult(buffer, new IPEndPoint(IPAddress.Parse("127.0.0.1"), 1234)));
-
+			await writer.WriteAsync(buffer);
 			await Task.Delay(250);
 			Assert.NotNull(receivedPacket);
 		}
@@ -66,8 +72,14 @@ namespace Kadmium_sACN.Test.SacnReceiver
 		[Fact]
 		public async Task When_ASynchronizationPacketIsReceived_Then_TheEventIsTriggered()
 		{
-			var udpWrapper = Mock.Of<IUdpWrapper>();
-			var server = new TestSacnReceiver(udpWrapper);
+			PipeWriter writer = null;
+			var udpPipeline = Mock.Of<IUdpPipeline>();
+
+			Mock.Get(udpPipeline)
+				.Setup(x => x.ListenAsync(It.IsAny<PipeWriter>(), It.IsAny<IPEndPoint>()))
+				.Callback<PipeWriter, IPEndPoint>((pipeWriter, endPoint) => writer = pipeWriter);
+
+			var server = new TestSacnReceiver(udpPipeline);
 			server.Listen(IPAddress.Any);
 			SynchronizationPacket receivedPacket = null;
 
@@ -80,9 +92,7 @@ namespace Kadmium_sACN.Test.SacnReceiver
 			byte sequenceNumber = 43;
 
 			var buffer = SynchronizationPacketTests.GetSynchronizationPacket(CID, sequenceNumber).ToArray();
-
-			Mock.Get(udpWrapper).Raise(x => x.OnPacketReceived += null, null, new UdpReceiveResult(buffer, new IPEndPoint(IPAddress.Parse("127.0.0.1"), 1234)));
-
+			await writer.WriteAsync(buffer);
 			await Task.Delay(250);
 			Assert.NotNull(receivedPacket);
 		}
@@ -90,8 +100,14 @@ namespace Kadmium_sACN.Test.SacnReceiver
 		[Fact]
 		public async Task When_AUniverseDiscoveryPacketISReceived_Then_TheEventIsTriggered()
 		{
-			var udpWrapper = Mock.Of<IUdpWrapper>();
-			var server = new TestSacnReceiver(udpWrapper);
+			PipeWriter writer = null;
+			var udpPipeline = Mock.Of<IUdpPipeline>();
+
+			Mock.Get(udpPipeline)
+				.Setup(x => x.ListenAsync(It.IsAny<PipeWriter>(), It.IsAny<IPEndPoint>()))
+				.Callback<PipeWriter, IPEndPoint>((pipeWriter, endPoint) => writer = pipeWriter);
+
+			var server = new TestSacnReceiver(udpPipeline);
 			server.Listen(IPAddress.Any);
 			UniverseDiscoveryPacket receivedPacket = null;
 
@@ -109,8 +125,7 @@ namespace Kadmium_sACN.Test.SacnReceiver
 				.ToArray();
 
 			var buffer = UniverseDiscoveryPacketTests.GetUniverseDiscoveryPacket(CID, sourceName, page, lastPage, universes).ToArray();
-
-			Mock.Get(udpWrapper).Raise(x => x.OnPacketReceived += null, null, new UdpReceiveResult(buffer, new IPEndPoint(IPAddress.Parse("127.0.0.1"), 1234)));
+			await writer.WriteAsync(buffer);
 
 			await Task.Delay(250);
 			Assert.NotNull(receivedPacket);

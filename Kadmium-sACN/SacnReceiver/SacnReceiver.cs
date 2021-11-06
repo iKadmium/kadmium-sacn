@@ -6,56 +6,75 @@ using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.IO.Pipelines;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Kadmium_sACN.SacnReceiver
 {
 	public abstract class SacnReceiver : IDisposable, ISacnReceiver
 	{
-		protected IUdpWrapper UdpWrapper { get; }
+		protected IUdpPipeline UdpPipeline { get; }
 
 		public event EventHandler<DataPacket> OnDataPacketReceived;
 		public event EventHandler<SynchronizationPacket> OnSynchronizationPacketReceived;
 		public event EventHandler<UniverseDiscoveryPacket> OnUniverseDiscoveryPacketReceived;
 
-		public IPEndPoint HostEndPoint => UdpWrapper.HostEndPoint;
+		public IPEndPoint HostEndPoint => UdpPipeline.LocalEndPoint;
 
-		protected SacnReceiver(IUdpWrapper udpWrapper)
+		private CancellationTokenSource CancellationTokenSource { get; }
+
+		private Task ProcessTask { get; set; }
+		private Task ListenTask { get; set; }
+
+		protected SacnReceiver(IUdpPipeline pipeline)
 		{
-			UdpWrapper = udpWrapper;
+			UdpPipeline = pipeline;
+			CancellationTokenSource = new CancellationTokenSource();
 		}
 
 		public abstract void Listen(IPAddress address);
 
 		protected void ListenInternal(IPAddress address)
 		{
-			RegisterListeners();
 			var endpoint = new IPEndPoint(address, Constants.Port);
-			UdpWrapper.Listen(endpoint);
+
+			Pipe pipe = new Pipe();
+			ListenTask = UdpPipeline.ListenAsync(pipe.Writer, endpoint);
+			ProcessTask = ProcessPackets(pipe.Reader);
 		}
 
-		private void RegisterListeners()
+		private async Task ProcessPackets(PipeReader reader)
 		{
-			UdpWrapper.OnPacketReceived += (object sender, UdpReceiveResult e) =>
+			var token = CancellationTokenSource.Token;
+			while (!token.IsCancellationRequested)
 			{
-				var packet = SacnPacket.Parse(e.Buffer);
-				switch (packet)
+				var result = await reader.ReadAsync(token);
+
+				if (result.Buffer.IsSingleSegment)
 				{
-					case DataPacket dataPacket:
-						OnDataPacketReceived?.Invoke(this, dataPacket);
-						break;
-					case SynchronizationPacket syncPacket:
-						OnSynchronizationPacketReceived?.Invoke(this, syncPacket);
-						break;
-					case UniverseDiscoveryPacket discoveryPacket:
-						OnUniverseDiscoveryPacketReceived?.Invoke(this, discoveryPacket);
-						break;
+					var packet = SacnPacket.Parse(result.Buffer.FirstSpan);
+					switch (packet)
+					{
+						case DataPacket dataPacket:
+							OnDataPacketReceived?.Invoke(this, dataPacket);
+							break;
+						case SynchronizationPacket syncPacket:
+							OnSynchronizationPacketReceived?.Invoke(this, syncPacket);
+							break;
+						case UniverseDiscoveryPacket discoveryPacket:
+							OnUniverseDiscoveryPacketReceived?.Invoke(this, discoveryPacket);
+							break;
+					}
 				}
-			};
+			}
+			reader.Complete();
 		}
 
 		public void Dispose()
 		{
-			UdpWrapper?.Dispose();
+			CancellationTokenSource.Cancel();
+			UdpPipeline?.Dispose();
 		}
 	}
 }

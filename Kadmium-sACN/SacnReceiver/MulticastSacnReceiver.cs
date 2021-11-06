@@ -11,7 +11,7 @@ namespace Kadmium_sACN.SacnReceiver
 	{
 		private ISacnMulticastAddressProvider MulticastAddressProvider { get; }
 
-		protected MulticastSacnReceiver(IUdpWrapper udpWrapper, ISacnMulticastAddressProvider multicastAddressProvider) : base(udpWrapper)
+		protected MulticastSacnReceiver(IUdpPipeline udpPipeline, ISacnMulticastAddressProvider multicastAddressProvider) : base(udpPipeline)
 		{
 			MulticastAddressProvider = multicastAddressProvider;
 		}
@@ -31,7 +31,8 @@ namespace Kadmium_sACN.SacnReceiver
 				throw new ArgumentOutOfRangeException($"Universe must be between {Constants.Universe_MinValue} and {Constants.Universe_MaxValue} inclusive");
 			}
 
-			UdpWrapper.JoinMulticastGroup(MulticastAddressProvider.GetMulticastAddress(universe));
+			var multicastAddress = MulticastAddressProvider.GetMulticastAddress(universe);
+			UdpPipeline.JoinMulticastGroup(multicastAddress);
 		}
 
 		public void DropMulticastGroups(IEnumerable<ushort> universes)
@@ -49,7 +50,7 @@ namespace Kadmium_sACN.SacnReceiver
 				throw new ArgumentOutOfRangeException($"Universe must be between {Constants.Universe_MinValue} and {Constants.Universe_MaxValue} inclusive");
 			}
 
-			UdpWrapper.DropMulticastGroup(MulticastAddressProvider.GetMulticastAddress(universe));
+			UdpPipeline.DropMulticastGroup(MulticastAddressProvider.GetMulticastAddress(universe));
 		}
 	}
 }

@@ -19,7 +19,7 @@ namespace Kadmium_sACN.Test.SacnReceiver
 	{
 		private class TestMulticastSacnReceiver : MulticastSacnReceiver
 		{
-			public TestMulticastSacnReceiver(IUdpWrapper udpWrapper, ISacnMulticastAddressProvider multicastAddressProvider) : base(udpWrapper, multicastAddressProvider)
+			public TestMulticastSacnReceiver(IUdpPipeline udpPipeline, ISacnMulticastAddressProvider multicastAddressProvider) : base(udpPipeline, multicastAddressProvider)
 			{
 			}
 
@@ -35,8 +35,8 @@ namespace Kadmium_sACN.Test.SacnReceiver
 			IPAddress joinedAddress = null;
 			EndPoint endPoint = new IPEndPoint(IPAddress.Parse("::1"), 1234);
 
-			var udpWrapper = Mock.Of<IUdpWrapper>(x =>
-				x.HostEndPoint == endPoint
+			var udpPipeline = Mock.Of<IUdpPipeline>(x =>
+				x.LocalEndPoint == endPoint
 			);
 
 			var returnedAddress = new IPAddress(new byte[] { 192, 168, 0, 1 });
@@ -45,11 +45,11 @@ namespace Kadmium_sACN.Test.SacnReceiver
 				x.GetMulticastAddress(It.IsAny<UInt16>()) == returnedAddress
 			);
 
-			Mock.Get(udpWrapper)
+			Mock.Get(udpPipeline)
 				.Setup(x => x.JoinMulticastGroup(It.IsAny<IPAddress>()))
 				.Callback<IPAddress>(addr => joinedAddress = addr);
 
-			var server = new TestMulticastSacnReceiver(udpWrapper, addressProvider);
+			var server = new TestMulticastSacnReceiver(udpPipeline, addressProvider);
 			server.Listen(IPAddress.Any);
 			server.JoinMulticastGroup(1);
 
@@ -59,7 +59,7 @@ namespace Kadmium_sACN.Test.SacnReceiver
 		[Fact]
 		public void Given_TheUniverseIsTooHigh_When_TheUniverseIsSet_Then_AnExceptionIsThrown()
 		{
-			var udpWrapper = Mock.Of<IUdpWrapper>();
+			var udpWrapper = Mock.Of<IUdpPipeline>();
 			var server = new TestMulticastSacnReceiver(udpWrapper, Mock.Of<ISacnMulticastAddressProvider>());
 			server.Listen(IPAddress.Any);
 			Assert.Throws<ArgumentOutOfRangeException>(() => server.JoinMulticastGroup(Constants.Universe_MaxValue + 1));
@@ -68,7 +68,7 @@ namespace Kadmium_sACN.Test.SacnReceiver
 		[Fact]
 		public void Given_TheUniverseIsTooLow_When_TheUniverseIsSet_Then_AnExceptionIsThrown()
 		{
-			var udpWrapper = Mock.Of<IUdpWrapper>();
+			var udpWrapper = Mock.Of<IUdpPipeline>();
 			var server = new TestMulticastSacnReceiver(udpWrapper, Mock.Of<ISacnMulticastAddressProvider>());
 			server.Listen(IPAddress.Any);
 			Assert.Throws<ArgumentOutOfRangeException>(() => server.JoinMulticastGroup(Constants.Universe_MinValue - 1));
@@ -80,11 +80,11 @@ namespace Kadmium_sACN.Test.SacnReceiver
 			var universes = Enumerable.Range(Constants.Universe_MinValue, 5)
 				.Select(x => (UInt16)x);
 
-			var udpWrapper = Mock.Of<IUdpWrapper>(x =>
-				x.HostEndPoint == new IPEndPoint(new IPAddress(new byte[] { 192, 168, 0, 1 }), 5568)
+			var udpWrapper = Mock.Of<IUdpPipeline>(x =>
+				x.LocalEndPoint == new IPEndPoint(new IPAddress(new byte[] { 192, 168, 0, 1 }), 5568)
 			);
 			var addressProvider = Mock.Of<ISacnMulticastAddressProvider>();
-			
+
 			var server = new TestMulticastSacnReceiver(udpWrapper, addressProvider);
 			server.Listen(IPAddress.Any);
 			server.JoinMulticastGroups(universes);
@@ -92,7 +92,5 @@ namespace Kadmium_sACN.Test.SacnReceiver
 			Mock.Get(udpWrapper)
 				.Verify(x => x.JoinMulticastGroup(It.IsAny<IPAddress>()), Times.Exactly(universes.Count()));
 		}
-
-		
 	}
 }
