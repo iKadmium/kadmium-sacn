@@ -75,38 +75,35 @@ namespace Kadmium_sACN.Test
 			}
 		}
 
-		[Fact]
-		public async Task When_ListeningAndSendingMulticastOnIPV4_Then_MessagesAreSentAndReceived()
-		{
-			UInt16 universe = 1;
-			using (var sender = new SacnSender.SacnSender())
-			{
-				using (var receiver = new SacnReceiver.SacnReceiver())
-				{
-					DataPacket received = null;
+		// [Fact]
+		// public async Task When_ListeningAndSendingMulticastOnIPV4_Then_MessagesAreSentAndReceived()
+		// {
+		// 	UInt16 universe = 1;
+		// 	using (var sender = new SacnSender.SacnSender())
+		// 	{
+		// 		using (var receiver = new SacnReceiver.SacnReceiver())
+		// 		{
+		// 			DataPacket received = null;
 
-					var hostname = Dns.GetHostName();
-					var ipAddresses = await Dns.GetHostAddressesAsync(hostname);
+		// 			receiver.OnDataPacketReceived += (sender, packet) =>
+		// 			{
+		// 				received = packet;
+		// 			};
+		// 			receiver.Listen(IPAddress.Any);
+		// 			await Task.Delay(250);
+		// 			receiver.JoinMulticastGroup(universe, false);
 
-					receiver.OnDataPacketReceived += (sender, packet) =>
-					{
-						received = packet;
-					};
-					receiver.Listen(IPAddress.Any);
-					await Task.Delay(250);
-					receiver.JoinMulticastGroup(universe, false);
+		// 			var packet = new DataPacket();
+		// 			packet.FramingLayer.SourceName = "Source name";
+		// 			packet.FramingLayer.Universe = universe;
+		// 			packet.DMPLayer.PropertyValues = new byte[] { 1, 2, 3, 4 };
 
-					var packet = new DataPacket();
-					packet.FramingLayer.SourceName = "Source name";
-					packet.FramingLayer.Universe = universe;
-					packet.DMPLayer.PropertyValues = new byte[] { 1, 2, 3, 4 };
-
-					await sender.SendMulticast(packet, false);
-					await Task.Delay(250);
-					Assert.NotNull(received);
-				}
-			}
-		}
+		// 			await sender.SendMulticast(packet, false);
+		// 			await Task.Delay(250);
+		// 			Assert.NotNull(received);
+		// 		}
+		// 	}
+		// }
 
 		[Fact]
 		public async Task When_ListeningAndSendingMulticastOnIPV6_Then_MessagesAreSentAndReceived()
@@ -117,10 +114,6 @@ namespace Kadmium_sACN.Test
 				using (var receiver = new SacnReceiver.SacnReceiver())
 				{
 					DataPacket received = null;
-
-					var hostname = Dns.GetHostName();
-					var ipAddresses = await Dns.GetHostAddressesAsync(hostname);
-					var address = ipAddresses.First(x => x.AddressFamily == AddressFamily.InterNetworkV6);
 
 					receiver.OnDataPacketReceived += (sender, packet) =>
 					{
