@@ -11,6 +11,7 @@ namespace Kadmium_sACN
 		public DataPacketFramingLayer FramingLayer { get; set; }
 		public DMPLayer DMPLayer { get; set; }
 		public override int Length => RootLayer.Length + DataPacketFramingLayer.Length + DMPLayer.Length;
+		public const int MAX_LENGTH = 1143;
 
 		public DataPacket()
 		{
@@ -18,7 +19,7 @@ namespace Kadmium_sACN
 			{
 				Vector = RootLayerVector.VECTOR_ROOT_E131_DATA
 			};
-			FramingLayer = new DataPacketFramingLayer(); 
+			FramingLayer = new DataPacketFramingLayer();
 			DMPLayer = new DMPLayer();
 		}
 

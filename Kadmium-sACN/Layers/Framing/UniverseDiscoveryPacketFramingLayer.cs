@@ -48,7 +48,7 @@ namespace Kadmium_sACN.Layers.Framing
 			var sourceNameBytes = bytes.Slice(0, 64);
 			bytes = bytes.Slice(64);
 			var endOfString = sourceNameBytes.IndexOf((byte)0);
-			framingLayer.SourceName = Encoding.UTF8.GetString(sourceNameBytes.Slice(0, endOfString).ToArray());
+			framingLayer.SourceName = Encoding.UTF8.GetString(sourceNameBytes.Slice(0, endOfString));
 
 			return framingLayer;
 		}
