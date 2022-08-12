@@ -46,7 +46,7 @@ namespace Kadmium_sACN.Layers.Framing
 				universe = value;
 			}
 		}
-		
+
 		public byte Options
 		{
 			get
@@ -74,7 +74,7 @@ namespace Kadmium_sACN.Layers.Framing
 			}
 		}
 
-		
+
 
 		public DataPacketFramingLayer()
 		{
@@ -117,7 +117,7 @@ namespace Kadmium_sACN.Layers.Framing
 
 			var sourceNameBytes = bytes.Slice(0, 64);
 			bytes = bytes.Slice(64);
-			framingLayer.SourceName = Encoding.UTF8.GetString(sourceNameBytes.ToArray());
+			framingLayer.SourceName = Encoding.UTF8.GetString(sourceNameBytes);
 
 			framingLayer.Priority = bytes[0];
 			bytes = bytes.Slice(sizeof(byte));
@@ -137,6 +137,6 @@ namespace Kadmium_sACN.Layers.Framing
 			return framingLayer;
 		}
 
-		
+
 	}
 }
