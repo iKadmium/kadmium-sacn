@@ -1,5 +1,4 @@
 ﻿using Kadmium_sACN.MulticastAddressProvider;
-using Kadmium_Udp;
 using System;
 using System.Buffers;
 using System.Collections.Generic;
@@ -11,31 +10,68 @@ using System.Threading.Tasks;
 
 namespace Kadmium_sACN.SacnSender
 {
-	public abstract class SacnSender : IDisposable
+	public class SacnSender : IDisposable
 	{
-		private IUdpWrapper UdpWrapper { get; }
-		private ISacnMulticastAddressProvider MulticastAddressProvider { get; }
+		private ISacnMulticastAddressProvider Ipv4MulticastAddressProvider { get; }
+		private ISacnMulticastAddressProvider Ipv6MulticastAddressProvider { get; }
+		private Socket Ipv4Socket { get; } = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
+		private Socket Ipv6Socket { get; } = new Socket(AddressFamily.InterNetworkV6, SocketType.Dgram, ProtocolType.Udp);
 
-		protected SacnSender(IUdpWrapper udpWrapper)
+		public SacnSender() : this(new SacnMulticastAddressProviderIPV4(), new SacnMulticastAddressProviderIPV6())
+		{ }
+
+		protected SacnSender(ISacnMulticastAddressProvider ipv4AddressProvider, ISacnMulticastAddressProvider ipv6AddressProvider)
 		{
-			UdpWrapper = udpWrapper;
+			Ipv4MulticastAddressProvider = ipv4AddressProvider;
+			Ipv6MulticastAddressProvider = ipv6AddressProvider;
 		}
-
-		public SacnSender() : this(new UdpWrapper()) { }
 
 		protected async Task SendInternal(IPAddress address, SacnPacket packet)
 		{
+			var endpoint = new IPEndPoint(address, Constants.Port);
 			using (var owner = MemoryPool<byte>.Shared.Rent(packet.Length))
 			{
 				var bytes = owner.Memory.Slice(0, packet.Length);
 				packet.Write(bytes.Span);
-				await UdpWrapper.Send(new IPEndPoint(address, Constants.Port), bytes);
+				var socket = address.AddressFamily == AddressFamily.InterNetworkV6 ? Ipv6Socket : Ipv4Socket;
+				await socket.SendToAsync(bytes, SocketFlags.None, endpoint);
 			}
+		}
+
+		public Task SendUnicast(DataPacket packet, IPAddress remoteHost)
+		{
+			return SendInternal(remoteHost, packet);
+		}
+
+		public Task SendUnicast(UniverseDiscoveryPacket packet, IPAddress remoteHost)
+		{
+			return SendInternal(remoteHost, packet);
+		}
+
+		public Task SendUnicast(SynchronizationPacket packet, IPAddress remoteHost)
+		{
+			return SendInternal(remoteHost, packet);
+		}
+
+		public Task SendMulticast(DataPacket packet, bool ipv6 = false)
+		{
+			return SendInternal(Ipv6MulticastAddressProvider.GetMulticastAddress(packet.FramingLayer.Universe), packet);
+		}
+
+		public Task SendMulticast(UniverseDiscoveryPacket packet, bool ipv6 = false)
+		{
+			return SendInternal(Ipv6MulticastAddressProvider.GetMulticastAddress(UniverseDiscoveryPacket.DiscoveryUniverse), packet);
+		}
+
+		public Task SendMulticast(SynchronizationPacket packet, bool ipv6 = false)
+		{
+			return SendInternal(Ipv6MulticastAddressProvider.GetMulticastAddress(packet.FramingLayer.SynchronizationAddress), packet);
 		}
 
 		public void Dispose()
 		{
-			UdpWrapper?.Dispose();
+			Ipv4Socket.Dispose();
+			Ipv6Socket.Dispose();
 		}
 	}
 }

@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.1</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
     <RootNamespace>Kadmium_sACN</RootNamespace>
   </PropertyGroup>
 
@@ -17,7 +17,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Kadmium-Udp" Version="1.1.3" />
     <PackageReference Include="System.IO.Pipelines" Version="5.0.1" />
     <PackageReference Include="System.Memory" Version="4.5.4" />
     <InternalsVisibleTo Include="Kadmium-sACN.Test" />

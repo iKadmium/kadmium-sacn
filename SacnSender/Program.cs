@@ -16,7 +16,7 @@ namespace SacnSenderTestUtil
 			UInt16 universe = 1;
 			string sourceName = "My lovely source";
 			SacnPacketFactory factory = new SacnPacketFactory(cid, sourceName);
-			using var sacnSender = new MulticastSacnSenderIPV4();
+			using var sacnSender = new SacnSender();
 
 			using Timer timer = new Timer(10000);
 			timer.Elapsed += async (sender, e) =>
@@ -24,7 +24,7 @@ namespace SacnSenderTestUtil
 				var packets = factory.CreateUniverseDiscoveryPackets(new UInt16[] { universe });
 				foreach (var packet in packets)
 				{
-					await sacnSender.Send(packet);
+					await sacnSender.SendMulticast(packet);
 				}
 			};
 			timer.Start();
@@ -36,7 +36,7 @@ namespace SacnSenderTestUtil
 				{
 					Array.Fill(values, i);
 					var packet = factory.CreateDataPacket(universe, values);
-					await sacnSender.Send(packet);
+					await sacnSender.SendMulticast(packet);
 					await Task.Delay(1000 / 40);
 				}
 			}

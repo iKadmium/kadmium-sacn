@@ -10,7 +10,7 @@ namespace SacnViewer
 	{
 		static void Main(string[] args)
 		{
-			using var receiver = new MulticastSacnReceiverIPV4();
+			using var receiver = new SacnReceiver();
 			receiver.OnDataPacketReceived += (sender, packet) =>
 			{
 				Console.WriteLine(packet.FramingLayer.Universe + ": ");
