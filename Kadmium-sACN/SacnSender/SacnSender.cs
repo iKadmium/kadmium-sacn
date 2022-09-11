@@ -34,7 +34,24 @@ namespace Kadmium_sACN.SacnSender
 				var bytes = owner.Memory.Slice(0, packet.Length);
 				packet.Write(bytes.Span);
 				var socket = address.AddressFamily == AddressFamily.InterNetworkV6 ? Ipv6Socket : Ipv4Socket;
-				await socket.SendToAsync(bytes, SocketFlags.None, endpoint);
+
+				var args = new SocketAsyncEventArgs
+				{
+					SocketFlags = SocketFlags.None,
+					RemoteEndPoint = endpoint
+				};
+				args.SetBuffer(bytes);
+				var tsc = new TaskCompletionSource<SocketAsyncEventArgs>();
+				args.Completed += (_, args) =>
+				{
+					tsc.SetResult(args);
+				};
+				bool result = socket.SendToAsync(args);
+				if (result)
+				{
+					await tsc.Task;
+				}
+
 			}
 		}
 
