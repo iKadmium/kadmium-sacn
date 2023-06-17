@@ -72,16 +72,22 @@ namespace Kadmium_sACN.SacnSender
 
 		public Task SendMulticast(DataPacket packet, bool ipv6 = false)
 		{
+			if (!ipv6)
+				return SendInternal(Ipv4MulticastAddressProvider.GetMulticastAddress(packet.FramingLayer.Universe), packet);
 			return SendInternal(Ipv6MulticastAddressProvider.GetMulticastAddress(packet.FramingLayer.Universe), packet);
 		}
 
 		public Task SendMulticast(UniverseDiscoveryPacket packet, bool ipv6 = false)
 		{
+			if (!ipv6)
+				return SendInternal(Ipv4MulticastAddressProvider.GetMulticastAddress(UniverseDiscoveryPacket.DiscoveryUniverse), packet);
 			return SendInternal(Ipv6MulticastAddressProvider.GetMulticastAddress(UniverseDiscoveryPacket.DiscoveryUniverse), packet);
 		}
 
 		public Task SendMulticast(SynchronizationPacket packet, bool ipv6 = false)
 		{
+			if (!ipv6)
+				return SendInternal(Ipv4MulticastAddressProvider.GetMulticastAddress(packet.FramingLayer.SynchronizationAddress), packet);
 			return SendInternal(Ipv6MulticastAddressProvider.GetMulticastAddress(packet.FramingLayer.SynchronizationAddress), packet);
 		}
 
