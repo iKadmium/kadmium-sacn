@@ -58,5 +58,15 @@ namespace Kadmium_sACN
 			packet.UniverseDiscoveryLayer.Universes = universes.ToArray();
 			return packet;
 		}
+
+		public SynchronizationPacket CreateSynchronizationPacket(ushort synchronizationAddress, byte sequenceNumber = 0)
+		{
+			var packet = new SynchronizationPacket();
+			packet.RootLayer.CID = CID;
+			packet.FramingLayer.SynchronizationAddress = synchronizationAddress;
+			packet.FramingLayer.SequenceNumber = sequenceNumber;
+
+			return packet;
+		}
 	}
 }
