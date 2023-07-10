@@ -34,7 +34,7 @@ namespace Kadmium_sACN.SacnReceiver
 
 		public void Listen(IPAddress address)
 		{
-			var endpoint = new IPEndPoint(address, Constants.Port);
+			var endpoint = new IPEndPoint(address, Constants.RemotePort);
 
 			Pipe pipe = new Pipe();
 			Socket = new Socket(endpoint.AddressFamily, SocketType.Dgram, ProtocolType.Udp);
