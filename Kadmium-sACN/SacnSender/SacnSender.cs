@@ -22,8 +22,11 @@ namespace Kadmium_sACN.SacnSender
 		public SacnSender() : this(new SacnMulticastAddressProviderIPV4(), new SacnMulticastAddressProviderIPV6())
 		{ }
 
-		public SacnSender(IPAddress localAddress) : this(new SacnMulticastAddressProviderIPV4(), new SacnMulticastAddressProviderIPV6())
-		{ }
+		public SacnSender(IPAddress localAddress) : this(new SacnMulticastAddressProviderIPV4(),
+			new SacnMulticastAddressProviderIPV6())
+		{
+			_ip = localAddress;
+		}
 
 		protected SacnSender(ISacnMulticastAddressProvider ipv4AddressProvider, ISacnMulticastAddressProvider ipv6AddressProvider)
 		{
