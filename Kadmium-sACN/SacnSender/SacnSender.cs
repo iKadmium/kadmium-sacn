@@ -16,9 +16,17 @@ namespace Kadmium_sACN.SacnSender
 		private ISacnMulticastAddressProvider Ipv6MulticastAddressProvider { get; }
 		private Socket Ipv4Socket { get; } = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
 		private Socket Ipv6Socket { get; } = new Socket(AddressFamily.InterNetworkV6, SocketType.Dgram, ProtocolType.Udp);
+		
+		private IPAddress _ip;
 
 		public SacnSender() : this(new SacnMulticastAddressProviderIPV4(), new SacnMulticastAddressProviderIPV6())
 		{ }
+
+		public SacnSender(IPAddress localAddress) : this(new SacnMulticastAddressProviderIPV4(),
+			new SacnMulticastAddressProviderIPV6())
+		{
+			_ip = localAddress;
+		}
 
 		protected SacnSender(ISacnMulticastAddressProvider ipv4AddressProvider, ISacnMulticastAddressProvider ipv6AddressProvider)
 		{
@@ -28,13 +36,16 @@ namespace Kadmium_sACN.SacnSender
 
 		protected async Task SendInternal(IPAddress address, SacnPacket packet)
 		{
-			var endpoint = new IPEndPoint(address, Constants.Port);
+			var endpoint = new IPEndPoint(address, Constants.RemotePort);
 			using (var owner = MemoryPool<byte>.Shared.Rent(packet.Length))
 			{
 				var bytes = owner.Memory.Slice(0, packet.Length);
 				packet.Write(bytes.Span);
 				var socket = address.AddressFamily == AddressFamily.InterNetworkV6 ? Ipv6Socket : Ipv4Socket;
-
+				
+				if (_ip != null)
+					socket.Bind(new IPEndPoint(_ip, Constants.LocalPort));
+				
 				var args = new SocketAsyncEventArgs
 				{
 					SocketFlags = SocketFlags.None,
